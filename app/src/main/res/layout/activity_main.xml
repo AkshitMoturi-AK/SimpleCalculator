@@ -109,7 +109,7 @@
                     android:textSize="30dp"/>
 
                 <Button
-                    android:id="@+id/multiply"
+                    android:id="@+id/mul"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_marginLeft="20dp"
