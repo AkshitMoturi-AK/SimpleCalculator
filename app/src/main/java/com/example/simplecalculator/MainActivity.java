@@ -12,16 +12,32 @@ import java.util.Stack;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     TextView resultReference;
-    float firstOperand = 0;
-    float secondOperand = 0;
+    boolean isOperatorEnteredBefore = false;
+    String operand = "0";
+    Stack<Character> ops = new Stack<Character>();
+    Stack<Integer> values = new Stack<Integer>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Button btnZero = (Button)findViewById(R.id.zero);
+        Button btnDoubleZero = (Button)findViewById(R.id.doubleZero);
+        Button btnOne = (Button)findViewById(R.id.one);
+        Button btnTwo = (Button)findViewById(R.id.two);
+        Button btnThree = (Button)findViewById(R.id.three);
+        Button btnAdd = (Button)findViewById(R.id.Add);
+        Button btnMul = (Button)findViewById(R.id.mul);
+        Button btnEquals = (Button)findViewById(R.id.equals);
         resultReference = (TextView)findViewById(R.id.ResultTextView);
         btnZero.setOnClickListener(this);
+        btnDoubleZero.setOnClickListener(this);
+        btnOne.setOnClickListener(this);
+        btnTwo.setOnClickListener(this);
+        btnThree.setOnClickListener(this);
+        btnAdd.setOnClickListener(this);
+        btnMul.setOnClickListener(this);
+        btnEquals.setOnClickListener(this);
     }
 
     @Override
@@ -51,9 +67,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.dot : resultReference.setText(resultReference.getText().toString()+".");
                 break;
-            case R.id.add : resultReference.setText(resultReference.getText().toString()+"+");
+            case R.id.Add : pushOperator('+');
                 break;
-            case R.id.mul : resultReference.setText(resultReference.getText().toString()+"*");
+            case R.id.mul : pushOperator('*');
                 break;
             case R.id.equals : calculateResult();
                 break;
@@ -69,10 +85,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         char[] tokens = expression.toCharArray();
 
         // Stack for numbers: 'values'
-        Stack<Integer> values = new Stack<Integer>();
+       // Stack<Integer> values = new Stack<Integer>();
 
         // Stack for Operators: 'ops'
-        Stack<Character> ops = new Stack<Character>();
+      //  Stack<Character> ops = new Stack<Character>();
 
         for (int i = 0; i < tokens.length; i++)
         {
@@ -84,6 +100,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 // There may be more than one digits in number
                 while (i < tokens.length && tokens[i] >= '0' && tokens[i] <= '9')
                     sbuf.append(tokens[i++]);
+                i--;
                 values.push(Integer.parseInt(sbuf.toString()));
             }
 
@@ -107,15 +124,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             values.push(applyOp(ops.pop(), values.pop(), values.pop()));
 
         // Top of 'values' contains result, return it
-        resultReference.setText(values.pop());
+        resultReference.setText((values.pop()).toString());
     }
 
     // Returns true if 'op2' has higher or same precedence as 'op1',
     // otherwise returns false.
     public static boolean hasPrecedence(char op1, char op2)
     {
-        if (op2 == '(' || op2 == ')')
-            return false;
         if ((op1 == '*' || op1 == '/') && (op2 == '+' || op2 == '-'))
             return false;
         else
@@ -144,15 +159,36 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void changeResult(String numberPressed){
-        String currentText = resultReference.getText().toString();
-        if (currentText.equals("0") ){
+        //String currentText = resultReference.getText().toString();
+        isOperatorEnteredBefore = false;
+        if (operand.equals("0") ){
             if(numberPressed.equals("00")){
                 resultReference.setText("0");
             }else {
                 resultReference.setText(numberPressed);
+                operand = numberPressed;
             }
         }else{
-            resultReference.setText(currentText+numberPressed);
+            operand = operand.concat(numberPressed);
+            resultReference.setText(operand);
         }
+    }
+
+    private void pushOperator(char op){
+
+        if(isOperatorEnteredBefore == true) {
+            ops.pop();
+        }
+        else{
+            values.push(Integer.parseInt(operand));
+            operand = "0";
+            isOperatorEnteredBefore = true;
+        }
+        while (!ops.empty() && hasPrecedence(op, ops.peek())) {
+            values.push(applyOp(ops.pop(), values.pop(), values.pop()));
+            resultReference.setText((values.peek()).toString());
+        }
+        ops.push(op);
+
     }
 }
