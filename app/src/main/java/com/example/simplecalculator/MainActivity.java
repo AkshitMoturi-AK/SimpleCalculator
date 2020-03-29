@@ -2,6 +2,7 @@ package com.example.simplecalculator;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -12,183 +13,204 @@ import java.util.Stack;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     TextView resultReference;
+    Button currentButtonReference = null;
     boolean isOperatorEnteredBefore = false;
-    String operand = "0";
-    Stack<Character> ops = new Stack<Character>();
-    Stack<Integer> values = new Stack<Integer>();
+    StringBuilder currentOperand;
+    Stack<Character> operators = new Stack<Character>();
+    Stack<Integer> operands = new Stack<Integer>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Button btnZero = (Button)findViewById(R.id.zero);
-        Button btnDoubleZero = (Button)findViewById(R.id.doubleZero);
-        Button btnOne = (Button)findViewById(R.id.one);
-        Button btnTwo = (Button)findViewById(R.id.two);
-        Button btnThree = (Button)findViewById(R.id.three);
-        Button btnAdd = (Button)findViewById(R.id.Add);
-        Button btnMul = (Button)findViewById(R.id.mul);
-        Button btnEquals = (Button)findViewById(R.id.equals);
-        resultReference = (TextView)findViewById(R.id.ResultTextView);
+        currentOperand = new StringBuilder();
+        Button btnZero = (Button) findViewById(R.id.zero);
+        Button btnDoubleZero = (Button) findViewById(R.id.doubleZero);
+        Button btnOne = (Button) findViewById(R.id.one);
+        Button btnTwo = (Button) findViewById(R.id.two);
+        Button btnThree = (Button) findViewById(R.id.three);
+        Button btnFour = (Button) findViewById(R.id.four);
+        Button btnFive = (Button) findViewById(R.id.five);
+        Button btnSix = (Button) findViewById(R.id.six);
+        Button btnSeven = (Button) findViewById(R.id.seven);
+        Button btnEight = (Button) findViewById(R.id.eight);
+        Button btnNine = (Button) findViewById(R.id.nine);
+        Button btnAdd = (Button) findViewById(R.id.Add);
+        Button btnSubtract = (Button) findViewById(R.id.subtract);
+        Button btnMul = (Button) findViewById(R.id.mul);
+        Button btnDivide = (Button) findViewById(R.id.division);
+        Button btnPercentage = (Button) findViewById(R.id.percentage);
+        Button btnEquals = (Button) findViewById(R.id.equals);
+        Button btnAllClear = (Button)findViewById(R.id.clearButton);
+        resultReference = (TextView) findViewById(R.id.ResultTextView);
         btnZero.setOnClickListener(this);
         btnDoubleZero.setOnClickListener(this);
         btnOne.setOnClickListener(this);
         btnTwo.setOnClickListener(this);
         btnThree.setOnClickListener(this);
+        btnFive.setOnClickListener(this);
+        btnFive.setOnClickListener(this);
+        btnSix.setOnClickListener(this);
+        btnSeven.setOnClickListener(this);
+        btnEight.setOnClickListener(this);
+        btnNine.setOnClickListener(this);
         btnAdd.setOnClickListener(this);
+        btnSubtract.setOnClickListener(this);
         btnMul.setOnClickListener(this);
+        btnDivide.setOnClickListener(this);
+        btnPercentage.setOnClickListener(this);
         btnEquals.setOnClickListener(this);
+        btnAllClear.setOnClickListener(this);
+
     }
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()){
-            case R.id.zero : changeResult("0");
+        switch (v.getId()) {
+            case R.id.zero:
+                changeResult("0");
                 break;
-            case R.id.doubleZero : changeResult("00");
+            case R.id.doubleZero:
+                changeResult("00");
                 break;
-            case R.id.one : changeResult("1");
+            case R.id.one:
+                changeResult("1");
                 break;
-            case R.id.two : changeResult("2");
+            case R.id.two:
+                changeResult("2");
                 break;
-            case R.id.three : changeResult("3");
+            case R.id.three:
+                changeResult("3");
                 break;
-            case R.id.four : changeResult("4");
+            case R.id.four:
+                changeResult("4");
                 break;
-            case R.id.five : changeResult("5");
+            case R.id.five:
+                changeResult("5");
                 break;
-            case R.id.six : changeResult("6");
+            case R.id.six:
+                changeResult("6");
                 break;
-            case R.id.seven : changeResult("7");
+            case R.id.seven:
+                changeResult("7");
                 break;
-            case R.id.eight : changeResult("8");
+            case R.id.eight:
+                changeResult("8");
                 break;
-            case R.id.nine : changeResult("9");
+            case R.id.nine:
+                changeResult("9");
                 break;
-            case R.id.dot : resultReference.setText(resultReference.getText().toString()+".");
+            case R.id.dot:
+                resultReference.setText(resultReference.getText().toString() + ".");
                 break;
-            case R.id.Add : pushOperator('+');
+            case R.id.Add:
+                currentButtonReference = (Button) v;
+                pushOperator('+');
                 break;
-            case R.id.mul : pushOperator('*');
+            case R.id.subtract:
+                currentButtonReference = (Button) v;
+                pushOperator('-');
                 break;
-            case R.id.equals : calculateResult();
+            case R.id.mul:
+                currentButtonReference = (Button) v;
+                pushOperator('*');
                 break;
-
-
-
-
+            case R.id.division:
+                currentButtonReference = (Button) v;
+                pushOperator('/');
+                break;
+            case R.id.equals:
+                calculateResult();
+                break;
+            case R.id.clearButton :
+                currentOperand.delete(0, currentOperand.length());
+                if (currentButtonReference != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    currentButtonReference.setBackground(getDrawable(R.drawable.rounded_corners_inactive));
+                }
+                currentButtonReference = null;
+                isOperatorEnteredBefore = false;
+                operands.removeAllElements();
+                operators.removeAllElements();
+                resultReference.setText("0");
         }
     }
 
     private void calculateResult() {
-        String expression = resultReference.getText().toString();
-        char[] tokens = expression.toCharArray();
-
-        // Stack for numbers: 'values'
-       // Stack<Integer> values = new Stack<Integer>();
-
-        // Stack for Operators: 'ops'
-      //  Stack<Character> ops = new Stack<Character>();
-
-        for (int i = 0; i < tokens.length; i++)
-        {
-
-            // Current token is a number, push it to stack for numbers
-            if (tokens[i] >= '0' && tokens[i] <= '9')
-            {
-                StringBuffer sbuf = new StringBuffer();
-                // There may be more than one digits in number
-                while (i < tokens.length && tokens[i] >= '0' && tokens[i] <= '9')
-                    sbuf.append(tokens[i++]);
-                i--;
-                values.push(Integer.parseInt(sbuf.toString()));
-            }
-
-            // Current token is an operator.
-            else if (tokens[i] == '+' || tokens[i] == '-' || tokens[i] == '*' || tokens[i] == '/')
-            {
-                // While top of 'ops' has same or greater precedence to current
-                // token, which is an operator. Apply operator on top of 'ops'
-                // to top two elements in values stack
-                while (!ops.empty() && hasPrecedence(tokens[i], ops.peek()))
-                    values.push(applyOp(ops.pop(), values.pop(), values.pop()));
-
-                // Push current token to 'ops'.
-                ops.push(tokens[i]);
-            }
+        isOperatorEnteredBefore = false;
+        if (currentButtonReference != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            currentButtonReference.setBackground(getDrawable(R.drawable.rounded_corners_inactive));
         }
-
-        // Entire expression has been parsed at this point, apply remaining
-        // ops to remaining values
-        while (!ops.empty())
-            values.push(applyOp(ops.pop(), values.pop(), values.pop()));
-
-        // Top of 'values' contains result, return it
-        resultReference.setText((values.pop()).toString());
+        if(!(currentOperand.toString()).equals(""))
+        operands.push(Integer.parseInt(currentOperand.toString()));
+        if (!operators.empty() && !operands.empty() ) {
+            if(operands.size() == operators.size()){
+                operators.pop();
+            }
+            while(!operators.empty())
+            operands.push(applyOp(operators.pop(), operands.pop(), operands.pop()));
+        }
+        if(!operands.empty())
+        resultReference.setText((operands.peek()).toString());
     }
 
-    // Returns true if 'op2' has higher or same precedence as 'op1',
-    // otherwise returns false.
-    public static boolean hasPrecedence(char op1, char op2)
-    {
+    public static boolean hasPrecedence(char op1, char op2) {
         if ((op1 == '*' || op1 == '/') && (op2 == '+' || op2 == '-'))
             return false;
         else
             return true;
     }
 
-    // A utility method to apply an operator 'op' on operands 'a'
-    // and 'b'. Return the result.
-    public static int applyOp(char op, int b, int a)
-    {
-        switch (op)
-        {
+    public static int applyOp(char operator, int rightOperand, int leftOperand) {
+        switch (operator) {
             case '+':
-                return a + b;
+                return leftOperand + rightOperand;
             case '-':
-                return a - b;
+                return leftOperand - rightOperand;
             case '*':
-                return a * b;
+                return leftOperand * rightOperand;
             case '/':
-                if (b == 0)
-                    throw new
-                            UnsupportedOperationException("Cannot divide by zero");
-                return a / b;
+                if (rightOperand == 0)
+                    throw new UnsupportedOperationException("Cannot divide by zero");
+                return leftOperand / rightOperand;
         }
         return 0;
     }
 
-    private void changeResult(String numberPressed){
-        //String currentText = resultReference.getText().toString();
+    private void changeResult(String numberPressed) {
+        if (currentButtonReference != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            currentButtonReference.setBackground(getDrawable(R.drawable.rounded_corners_inactive));
+        }
         isOperatorEnteredBefore = false;
-        if (operand.equals("0") ){
-            if(numberPressed.equals("00")){
+        if ((currentOperand.toString()).equals("")) {
+            if (numberPressed.equals("00")) {
                 resultReference.setText("0");
-            }else {
+            } else {
                 resultReference.setText(numberPressed);
-                operand = numberPressed;
+                currentOperand.append(numberPressed);
             }
-        }else{
-            operand = operand.concat(numberPressed);
-            resultReference.setText(operand);
+        } else {
+            currentOperand.append(numberPressed);
+            resultReference.setText(currentOperand);
         }
     }
 
-    private void pushOperator(char op){
-
-        if(isOperatorEnteredBefore == true) {
-            ops.pop();
+    private void pushOperator(char op) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            currentButtonReference.setBackground(getDrawable(R.drawable.rounded_corners_active));
         }
-        else{
-            values.push(Integer.parseInt(operand));
-            operand = "0";
+        if (isOperatorEnteredBefore == true) {
+            operators.pop();
+        } else {
+            if (!(currentOperand.toString()).equals(""))
+                operands.push(Integer.parseInt(currentOperand.toString()));
+            currentOperand.delete(0, currentOperand.length());
             isOperatorEnteredBefore = true;
         }
-        while (!ops.empty() && hasPrecedence(op, ops.peek())) {
-            values.push(applyOp(ops.pop(), values.pop(), values.pop()));
-            resultReference.setText((values.peek()).toString());
+        while (!operators.empty() && hasPrecedence(op, operators.peek())) {
+            operands.push(applyOp(operators.pop(), operands.pop(), operands.pop()));
+            resultReference.setText((operands.peek()).toString());
         }
-        ops.push(op);
+        operators.push(op);
 
     }
 }
