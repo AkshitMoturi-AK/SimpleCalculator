@@ -12,48 +12,55 @@ import java.util.Stack;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    TextView resultReference;
-    Button currentButtonReference = null;
-    boolean isOperatorEnteredBefore = false;
-    StringBuilder currentOperand;
-    Stack<Character> operators = new Stack<Character>();
-    Stack<Integer> operands = new Stack<Integer>();
+    private TextView resultReference;
+    private Button currentButtonReference = null;
+    private boolean isOperatorEnteredBefore = false;
+    private StringBuilder currentOperand;
+    private Stack<Character> operators;
+    private Stack<Float> operands;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         currentOperand = new StringBuilder();
-        Button btnZero = (Button) findViewById(R.id.zero);
-        Button btnDoubleZero = (Button) findViewById(R.id.doubleZero);
-        Button btnOne = (Button) findViewById(R.id.one);
-        Button btnTwo = (Button) findViewById(R.id.two);
-        Button btnThree = (Button) findViewById(R.id.three);
-        Button btnFour = (Button) findViewById(R.id.four);
-        Button btnFive = (Button) findViewById(R.id.five);
-        Button btnSix = (Button) findViewById(R.id.six);
-        Button btnSeven = (Button) findViewById(R.id.seven);
-        Button btnEight = (Button) findViewById(R.id.eight);
-        Button btnNine = (Button) findViewById(R.id.nine);
-        Button btnAdd = (Button) findViewById(R.id.Add);
-        Button btnSubtract = (Button) findViewById(R.id.subtract);
-        Button btnMul = (Button) findViewById(R.id.mul);
-        Button btnDivide = (Button) findViewById(R.id.division);
-        Button btnPercentage = (Button) findViewById(R.id.percentage);
-        Button btnEquals = (Button) findViewById(R.id.equals);
-        Button btnAllClear = (Button)findViewById(R.id.clearButton);
-        resultReference = (TextView) findViewById(R.id.ResultTextView);
+        operators = new Stack<>();
+        operands = new Stack<>();
+        Button btnZero = findViewById(R.id.zero);
+        Button btnDoubleZero = findViewById(R.id.doubleZero);
+        Button btnOne = findViewById(R.id.one);
+        Button btnTwo = findViewById(R.id.two);
+        Button btnThree = findViewById(R.id.three);
+        Button btnFour = findViewById(R.id.four);
+        Button btnFive = findViewById(R.id.five);
+        Button btnSix = findViewById(R.id.six);
+        Button btnSeven = findViewById(R.id.seven);
+        Button btnEight = findViewById(R.id.eight);
+        Button btnNine = findViewById(R.id.nine);
+        Button btnDot = findViewById(R.id.dot);
+        Button btnSignChange = findViewById(R.id.signChange);
+        Button btnAdd = findViewById(R.id.Add);
+        Button btnSubtract = findViewById(R.id.subtract);
+        Button btnMul = findViewById(R.id.mul);
+        Button btnDivide = findViewById(R.id.division);
+        Button btnPercentage = findViewById(R.id.percentage);
+        Button btnEquals = findViewById(R.id.equals);
+        Button btnAllClear = findViewById(R.id.clearButton);
+        resultReference = findViewById(R.id.ResultTextView);
         btnZero.setOnClickListener(this);
         btnDoubleZero.setOnClickListener(this);
         btnOne.setOnClickListener(this);
         btnTwo.setOnClickListener(this);
         btnThree.setOnClickListener(this);
+        btnFour.setOnClickListener(this);
         btnFive.setOnClickListener(this);
         btnFive.setOnClickListener(this);
         btnSix.setOnClickListener(this);
         btnSeven.setOnClickListener(this);
         btnEight.setOnClickListener(this);
         btnNine.setOnClickListener(this);
+        btnDot.setOnClickListener(this);
+        btnSignChange.setOnClickListener(this);
         btnAdd.setOnClickListener(this);
         btnSubtract.setOnClickListener(this);
         btnMul.setOnClickListener(this);
@@ -101,7 +108,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 changeResult("9");
                 break;
             case R.id.dot:
-                resultReference.setText(resultReference.getText().toString() + ".");
+                changeResult(".");
+                break;
+            case R.id.signChange:
+                if(!isOperatorEnteredBefore && !currentOperand.toString().equals("") && !currentOperand.toString().equals("0")){
+                    currentOperand.insert(0,"-");
+                    resultReference.setText(currentOperand.toString());
+                }
                 break;
             case R.id.Add:
                 currentButtonReference = (Button) v;
@@ -132,6 +145,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 operands.removeAllElements();
                 operators.removeAllElements();
                 resultReference.setText("0");
+                break;
         }
     }
 
@@ -140,8 +154,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (currentButtonReference != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             currentButtonReference.setBackground(getDrawable(R.drawable.rounded_corners_inactive));
         }
-        if(!(currentOperand.toString()).equals(""))
-        operands.push(Integer.parseInt(currentOperand.toString()));
+        if(!(currentOperand.toString()).equals("")) {
+            operands.push(Float.parseFloat(currentOperand.toString()));
+            currentOperand.delete(0, currentOperand.length());
+        }
         if (!operators.empty() && !operands.empty() ) {
             if(operands.size() == operators.size()){
                 operators.pop();
@@ -149,18 +165,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             while(!operators.empty())
             operands.push(applyOp(operators.pop(), operands.pop(), operands.pop()));
         }
-        if(!operands.empty())
-        resultReference.setText((operands.peek()).toString());
+        if(!operands.empty()) {
+            currentOperand.append((operands.peek()).toString());
+            resultReference.setText((operands.peek()).toString());
+        }
     }
 
-    public static boolean hasPrecedence(char op1, char op2) {
-        if ((op1 == '*' || op1 == '/') && (op2 == '+' || op2 == '-'))
-            return false;
-        else
-            return true;
+    private static boolean hasPrecedence(char op1, char op2) {
+        return (op1 != '*' && op1 != '/') || (op2 != '+' && op2 != '-');
     }
 
-    public static int applyOp(char operator, int rightOperand, int leftOperand) {
+    private static float applyOp(char operator, float rightOperand, float leftOperand) {
         switch (operator) {
             case '+':
                 return leftOperand + rightOperand;
@@ -198,11 +213,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             currentButtonReference.setBackground(getDrawable(R.drawable.rounded_corners_active));
         }
-        if (isOperatorEnteredBefore == true) {
+        if (isOperatorEnteredBefore) {
             operators.pop();
         } else {
             if (!(currentOperand.toString()).equals(""))
-                operands.push(Integer.parseInt(currentOperand.toString()));
+                operands.push(Float.parseFloat(currentOperand.toString()));
             currentOperand.delete(0, currentOperand.length());
             isOperatorEnteredBefore = true;
         }
